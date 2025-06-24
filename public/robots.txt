@@ -1,0 +1,10 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /api/
+Disallow: /uploads/
+Disallow: /logs/
+Disallow: /backup/
+
+Allow: /assets/
+
+Sitemap: https://edulinks.sim.edu.az/sitemap.xml

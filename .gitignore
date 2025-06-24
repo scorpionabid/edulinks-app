@@ -1,0 +1,84 @@
+# Environment files
+.env
+.env.local
+.env.production
+
+# Logs
+*.log
+storage/logs/*
+!storage/logs/.gitkeep
+
+# Uploaded files
+public/uploads/*
+!public/uploads/.gitkeep
+
+# Cache
+storage/cache/*
+!storage/cache/.gitkeep
+
+# Sessions
+storage/sessions/*
+!storage/sessions/.gitkeep
+
+# Vendor (if using Composer)
+vendor/
+
+# Node modules (if using Node.js)
+node_modules/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Docker volumes
+postgres_data/
+redis_data/
+pgadmin_data/
+
+# Backup files
+*.bak
+*.backup
+*.sql.gz
+
+# Test coverage
+coverage/
+
+# Temporary files
+tmp/
+temp/
+
+# Build artifacts
+dist/
+build/
+
+# Composer
+composer.phar
+composer.lock
+
+# NPM
+package-lock.json
+yarn.lock
+
+# Local configuration
+docker-compose.override.yml
+
+# Certificates
+*.pem
+*.key
+*.crt
+
+# Debug files
+xdebug.log
+debug.log
