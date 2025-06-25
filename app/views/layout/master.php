@@ -1,3 +1,7 @@
+<?php
+require_once __DIR__ . '/../../Core/CSRF.php';
+require_once __DIR__ . '/../../Core/Session.php';
+?>
 <!DOCTYPE html>
 <html lang="az">
 <head>

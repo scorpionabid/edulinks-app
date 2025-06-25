@@ -39,6 +39,15 @@ function getEnvironmentVariable($key, $default = null) {
     return $default;
 }
 
+// Load core classes manually (no autoloader implementation detected)
+require_once __DIR__ . '/../Core/Session.php';
+require_once __DIR__ . '/../Core/CSRF.php';
+require_once __DIR__ . '/../Core/View.php';
+require_once __DIR__ . '/../Core/Router.php';
+require_once __DIR__ . '/../Core/Database.php';
+
+// You would ideally have an autoloader here instead of manual requires
+
 // Load environment variables from .env file as fallback
 $envFile = dirname(__DIR__, 2) . '/.env';
 if (file_exists($envFile)) {
