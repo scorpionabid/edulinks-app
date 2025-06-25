@@ -14,7 +14,7 @@ class User extends Model
     protected $table = 'users';
     protected $fillable = [
         'email',
-        'password_hash',
+        'password',
         'first_name',
         'last_name',
         'role',
@@ -22,7 +22,7 @@ class User extends Model
         'last_login',
         'remember_token'
     ];
-    protected $hidden = ['password_hash', 'remember_token'];
+    protected $hidden = ['password', 'remember_token'];
     
     /**
      * Find user by email
@@ -75,14 +75,13 @@ class User extends Model
     /**
      * Create new user with hashed password
      */
-    public function createUser(array $data): int
+    public function create(array $data): int
     {
         if (isset($data['password'])) {
-            $data['password_hash'] = password_hash($data['password'], PASSWORD_DEFAULT);
-            unset($data['password']);
+            $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
         }
         
-        return $this->create($data);
+        return parent::create($data);
     }
     
     /**
@@ -91,7 +90,7 @@ class User extends Model
     public function updatePassword(int $userId, string $newPassword): bool
     {
         $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-        return $this->update($userId, ['password_hash' => $hashedPassword]);
+        return $this->update($userId, ['password' => $hashedPassword]);
     }
     
     /**
