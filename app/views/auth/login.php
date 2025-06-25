@@ -1,3 +1,7 @@
+<?php
+use App\Core\Session;
+use App\Core\CSRF;
+?>
 <!DOCTYPE html>
 <html lang="az">
 <head>
