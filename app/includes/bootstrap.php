@@ -19,7 +19,27 @@ if ($config['debug']) {
 // Set timezone
 date_default_timezone_set($config['timezone']);
 
-// Load environment variables from .env file
+// Load environment variables - Docker environment variables take priority over .env file
+function getEnvironmentVariable($key, $default = null) {
+    // Check for Docker environment variables first
+    if (getenv($key) !== false) {
+        return getenv($key);
+    }
+    
+    // Then check $_SERVER and $_ENV
+    if (isset($_SERVER[$key])) {
+        return $_SERVER[$key];
+    }
+    
+    if (isset($_ENV[$key])) {
+        return $_ENV[$key];
+    }
+    
+    // Finally check .env file
+    return $default;
+}
+
+// Load environment variables from .env file as fallback
 $envFile = dirname(__DIR__, 2) . '/.env';
 if (file_exists($envFile)) {
     $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
@@ -32,8 +52,10 @@ if (file_exists($envFile)) {
         $key = trim($key);
         $value = trim($value, " \t\n\r\0\x0B\"'");
         
-        if (!array_key_exists($key, $_ENV)) {
+        // Only set from .env if not already set in environment
+        if (getenv($key) === false && !isset($_SERVER[$key]) && !isset($_ENV[$key])) {
             $_ENV[$key] = $value;
+            putenv("$key=$value");
         }
     }
 }

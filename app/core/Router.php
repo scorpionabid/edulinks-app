@@ -9,39 +9,39 @@ namespace App\Core;
 
 class Router
 {
-    private array $routes = [];
-    private string $basePath = '';
+    private static array $routes = [];
+    private static string $basePath = '';
     
     /**
      * Add GET route
      */
-    public function get(string $pattern, $handler): void
+    public static function get(string $pattern, $handler): void
     {
-        $this->addRoute('GET', $pattern, $handler);
+        self::addRoute('GET', $pattern, $handler);
     }
     
     /**
      * Add POST route
      */
-    public function post(string $pattern, $handler): void
+    public static function post(string $pattern, $handler): void
     {
-        $this->addRoute('POST', $pattern, $handler);
+        self::addRoute('POST', $pattern, $handler);
     }
     
     /**
      * Add PUT route
      */
-    public function put(string $pattern, $handler): void
+    public static function put(string $pattern, $handler): void
     {
-        $this->addRoute('PUT', $pattern, $handler);
+        self::addRoute('PUT', $pattern, $handler);
     }
     
     /**
      * Add DELETE route
      */
-    public function delete(string $pattern, $handler): void
+    public static function delete(string $pattern, $handler): void
     {
-        $this->addRoute('DELETE', $pattern, $handler);
+        self::addRoute('DELETE', $pattern, $handler);
     }
     
     /**
@@ -57,20 +57,20 @@ class Router
     /**
      * Set base path
      */
-    public function setBasePath(string $basePath): void
+    public static function setBasePath(string $basePath): void
     {
-        $this->basePath = rtrim($basePath, '/');
+        self::$basePath = rtrim($basePath, '/');
     }
     
     /**
      * Add route to collection
      */
-    private function addRoute(string $method, string $pattern, $handler): void
+    private static function addRoute(string $method, string $pattern, $handler): void
     {
-        $pattern = $this->basePath . '/' . ltrim($pattern, '/');
+        $pattern = self::$basePath . '/' . ltrim($pattern, '/');
         $pattern = rtrim($pattern, '/') ?: '/';
         
-        $this->routes[] = [
+        self::$routes[] = [
             'method' => $method,
             'pattern' => $pattern,
             'handler' => $handler
@@ -80,33 +80,34 @@ class Router
     /**
      * Dispatch request
      */
-    public function dispatch(string $uri, string $method): void
+    public static function dispatch(string $uri, string $method): void
     {
-        // Remove query string from URI
-        $uri = strtok($uri, '?');
+        $uri = trim($uri);
+        $method = strtoupper($method);
+        
         $uri = rtrim($uri, '/') ?: '/';
         
-        foreach ($this->routes as $route) {
+        foreach (self::$routes as $route) {
             if ($route['method'] !== $method) {
                 continue;
             }
             
-            $params = $this->matchRoute($route['pattern'], $uri);
+            $params = self::matchRoute($route['pattern'], $uri);
             
             if ($params !== false) {
-                $this->executeHandler($route['handler'], $params);
+                self::executeHandler($route['handler'], $params);
                 return;
             }
         }
         
         // No route found
-        $this->handleNotFound();
+        self::handleNotFound();
     }
     
     /**
      * Match route pattern against URI
      */
-    private function matchRoute(string $pattern, string $uri): array|false
+    private static function matchRoute(string $pattern, string $uri): array|false
     {
         // Convert route pattern to regex
         $pattern = preg_replace('/\{([^}]+)\}/', '([^/]+)', $pattern);
@@ -123,7 +124,7 @@ class Router
     /**
      * Execute route handler
      */
-    private function executeHandler($handler, array $params): void
+    private static function executeHandler($handler, array $params = []): void
     {
         try {
             if (is_string($handler)) {
@@ -157,18 +158,18 @@ class Router
             throw new \RuntimeException("Invalid route handler");
             
         } catch (\Throwable $e) {
-            $this->handleError($e);
+            self::handleError($e);
         }
     }
     
     /**
      * Handle 404 Not Found
      */
-    private function handleNotFound(): void
+    private static function handleNotFound(): void
     {
         http_response_code(404);
         
-        if ($this->isApiRequest()) {
+        if (self::isApiRequest()) {
             header('Content-Type: application/json');
             echo json_encode([
                 'success' => false,
@@ -187,14 +188,14 @@ class Router
     /**
      * Handle errors
      */
-    private function handleError(\Throwable $e): void
+    private static function handleError(\Throwable $e): void
     {
         http_response_code(500);
         
         // Log error
         error_log("Router Error: " . $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine());
         
-        if ($this->isApiRequest()) {
+        if (self::isApiRequest()) {
             header('Content-Type: application/json');
             echo json_encode([
                 'success' => false,
@@ -213,15 +214,24 @@ class Router
     /**
      * Check if request is API call
      */
-    private function isApiRequest(): bool
+    private static function isApiRequest(): bool
     {
         return strpos($_SERVER['REQUEST_URI'] ?? '', '/api/') === 0;
     }
     
     /**
+     * Get current URI
+     */
+    private static function getCurrentUri(): string
+    {
+        $uri = substr(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), strlen(self::$basePath));
+        return rtrim($uri, '/') ?: '/';
+    }
+    
+    /**
      * Generate URL for named route
      */
-    public function url(string $name, array $params = []): string
+    public static function url(string $name, array $params = []): string
     {
         // This would need route naming implementation
         // For now, return a simple URL

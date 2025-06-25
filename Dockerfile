@@ -37,8 +37,8 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
         pdo_pgsql \
         zip
 
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# No need for Composer as this is a custom PHP framework
+# COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Create application directories
 RUN mkdir -p \
@@ -63,8 +63,8 @@ COPY . /var/www/html/
 COPY docker/php/php.ini /usr/local/etc/php/php.ini
 COPY docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
 
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+# No PHP dependencies to install via Composer
+# This is a custom PHP framework without composer.json
 
 # Switch to www-data user
 USER www-data

@@ -35,6 +35,25 @@ $router->get('/login', function() {
     ]);
 });
 
+// Add /user/login route that redirects to /login for compatibility
+$router->get('/user/login', function() {
+    // Reuse the same login page
+    if (Auth::check()) {
+        if (Auth::isAdmin()) {
+            header('Location: /admin');
+        } else {
+            header('Location: /user');
+        }
+        exit;
+    }
+    
+    $view = new View();
+    $view->render('auth/login', [
+        'title' => 'Giriş',
+        '_no_layout' => true
+    ]);
+});
+
 $router->post('/login', 'AuthController@login');
 $router->post('/logout', 'AuthController@logout');
 

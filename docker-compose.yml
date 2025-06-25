@@ -19,6 +19,8 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./database/install.sql:/docker-entrypoint-initdb.d/install.sql
+      - ./database/migrations:/docker-entrypoint-initdb.d/migrations
+      - ./database/seeds:/docker-entrypoint-initdb.d/seeds
     networks:
       - edulinks_network
     healthcheck:

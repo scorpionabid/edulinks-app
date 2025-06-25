@@ -48,22 +48,15 @@ class CSRF
         
         $sessionToken = Session::get(self::$tokenName);
         
-        if (!$sessionToken) {
-            return false;
-        }
-        
-        // Get token from request if not provided
         if ($token === null) {
-            $token = self::getTokenFromRequest();
+            $token = filter_input(INPUT_POST, self::$tokenName) ?? 
+                    filter_input(INPUT_GET, self::$tokenName) ?? 
+                    ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? null);
         }
         
-        if (!$token) {
-            return false;
-        }
-        
-        // Use hash_equals to prevent timing attacks
-        return hash_equals($sessionToken, $token);
+        return !empty($sessionToken) && hash_equals($sessionToken, $token);
     }
+    
     
     /**
      * Get token from request
