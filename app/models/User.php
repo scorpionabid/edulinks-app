@@ -33,6 +33,15 @@ class User extends Model
     }
     
     /**
+     * Find user by email for authentication (includes password)
+     */
+    public function findByEmailForAuth(string $email): ?array
+    {
+        $query = "SELECT * FROM {$this->table} WHERE email = ? LIMIT 1";
+        return $this->db->fetchOne($query, [$email]);
+    }
+    
+    /**
      * Find active user by email
      */
     public function findActiveByEmail(string $email): ?array

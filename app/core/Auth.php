@@ -27,15 +27,15 @@ class Auth
     }
     
     /**
-     * Attempt to authenticate user
+     * Login user with email and password
      */
-    public static function attempt(string $email, string $password, bool $remember = false): bool
+    public static function login(string $email, string $password, bool $remember = false): bool
     {
         self::init();
         
-        $user = self::$userModel->findWhere(['email' => $email, 'is_active' => true]);
+        $user = self::$userModel->findByEmailForAuth($email);
         
-        if (!$user || !password_verify($password, $user['password_hash'])) {
+        if (!$user || !$user['is_active'] || !password_verify($password, $user['password'])) {
             return false;
         }
         
@@ -55,6 +55,14 @@ class Auth
         
         self::$user = $user;
         return true;
+    }
+    
+    /**
+     * Attempt to authenticate user (alias for login)
+     */
+    public static function attempt(string $email, string $password, bool $remember = false): bool
+    {
+        return self::login($email, $password, $remember);
     }
     
     /**
@@ -269,11 +277,11 @@ class Auth
         
         // Check user permissions
         $db = Database::getInstance();
-        $result = $db->fetchOne(
-            "SELECT id FROM user_permissions 
+        $result = $db->query(
+            "SELECT id FROM page_permissions 
              WHERE user_id = ? AND page_id = ? AND permission_type = ?",
             [self::id(), $pageId, $permission]
-        );
+        )->fetch();
         
         return $result !== null;
     }
@@ -291,19 +299,19 @@ class Auth
         
         if (self::isAdmin()) {
             // Admin can access all active pages
-            return $db->fetchAll(
+            return $db->query(
                 "SELECT * FROM pages WHERE is_active = true ORDER BY sort_order"
-            );
+            )->fetchAll();
         }
         
         // Get user's permitted pages
-        return $db->fetchAll(
-            "SELECT p.*, up.permission_type 
+        return $db->query(
+            "SELECT p.*, pp.permission_type 
              FROM pages p 
-             JOIN user_permissions up ON p.id = up.page_id 
-             WHERE up.user_id = ? AND p.is_active = true 
+             JOIN page_permissions pp ON p.id = pp.page_id 
+             WHERE pp.user_id = ? AND p.is_active = true 
              ORDER BY p.sort_order",
             [self::id()]
-        );
+        )->fetchAll();
     }
 }
